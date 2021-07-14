@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
 
             // Display the image
             image.setImageBitmap(bitmap)
-        }
+        }.start()  // Start the thread
 
     }
 }
