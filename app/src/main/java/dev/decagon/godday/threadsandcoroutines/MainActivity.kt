@@ -1,7 +1,11 @@
 package dev.decagon.godday.threadsandcoroutines
 
+import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import kotlinx.android.synthetic.main.activity_main.*
+import java.net.HttpURLConnection
+import java.net.URL
 
 /**
  * Main Screen
@@ -16,5 +20,19 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         // Your code
+
+        // Create and open a URL connection and cast it as HttpURLConnection
+        val imageUrl = URL("https://www.pngkit.com/png/detail/17-176284_eagle-owl-png-transparent-image-owl-png.png")
+        val connection = imageUrl.openConnection() as HttpURLConnection
+        connection.doInput = true // This connection is for input only
+        connection.connect()
+
+        // Create an inputStream to read the image from the server to your app
+        val inputStream = connection.inputStream
+        // Decode the inputStream into a bitmap using BitmapFactory
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+
+        // Display the image
+        image.setImageBitmap(bitmap)
     }
 }
