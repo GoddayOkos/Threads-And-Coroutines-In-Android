@@ -3,6 +3,7 @@ package dev.decagon.godday.threadsandcoroutines
 import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import kotlinx.android.synthetic.main.activity_main.*
 import java.net.HttpURLConnection
 import java.net.URL
@@ -19,7 +20,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Your code
+        // Get a reference to the MainLooper
+        val mainLooper = mainLooper  // or Looper.getMainLooper()
 
         /**
          * Android forbids making network calls or connections on MainThread in
@@ -38,8 +40,30 @@ class MainActivity : AppCompatActivity() {
             // Decode the inputStream into a bitmap using BitmapFactory
             val bitmap = BitmapFactory.decodeStream(inputStream)
 
-            // Display the image
-            image.setImageBitmap(bitmap)
+            /**
+             * Only the MainThread (UI Thread) can update the UI in Android
+             * so we switch to the UI thread to display our image i.e
+             * we post the data to the UI thread. There are several methods used
+             * in doing this.
+             */
+
+            // 1. This method is only available inside an activity
+        //    runOnUiThread { image.setImageBitmap(bitmap) }
+
+            // 2. Using Handler with MainLooper
+            /**
+             * Loopers are pieces of the Android ecosystem which loops through all
+             * messages or signals any thread receives and process them.
+             * The MainThread Looper or simply MainLooper handles messages for the
+             * MainThread.
+             *
+             * Handlers on the other hand are used to send messages to the loopers.
+             *
+             * The combination of handlers and loopers forms a relationship or connection
+             * between signals and threads that should process them
+             */
+            Handler(mainLooper).post { image.setImageBitmap(bitmap) }
+
         }.start()  // Start the thread
 
     }
