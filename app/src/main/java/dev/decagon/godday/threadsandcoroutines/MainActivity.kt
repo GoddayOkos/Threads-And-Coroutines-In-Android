@@ -118,6 +118,10 @@ class MainActivity : AppCompatActivity() {
      *  2. Coroutine Builder -> Determines the way the coroutine is launched. It is used to start
      *     coroutines and wraps code in a coroutine similar to using Threads & Runnables.
      *
-     *  A Dispatcher is a used to switch threads in coroutines similar to Handler + Looper combination
+     *  A Dispatcher is a used to switch threads in coroutines similar to Handler + Looper combination.
+     *  A GlobalScope holds no Dispatchers and launch() defines a Default dispatcher.
+     *  There are four different dispatchers but only two are commonly used. These are:
+     *  1. Dispatchers.IO -> Used for input/output work
+     *  2. Dispatchers.Main -> Used to post to the main thread.
      */
 }
