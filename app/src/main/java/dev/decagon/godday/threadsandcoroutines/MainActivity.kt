@@ -7,6 +7,7 @@ import android.os.Handler
 import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.net.HttpURLConnection
@@ -29,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         val mainLooper = mainLooper  // or Looper.getMainLooper()
 
         Log.d("TaskThread", Thread.currentThread().name)
-        GlobalScope.launch {
+        GlobalScope.launch(context = Dispatchers.IO) {
             Log.d("TaskThread", Thread.currentThread().name)
             // Create and open a URL connection and cast it as HttpURLConnection
             val imageUrl = URL("https://www.pngkit.com/png/detail/17-176284_eagle-owl-png-transparent-image-owl-png.png")
@@ -42,10 +43,15 @@ class MainActivity : AppCompatActivity() {
             // Decode the inputStream into a bitmap using BitmapFactory
             val bitmap = BitmapFactory.decodeStream(inputStream)
 
-            runOnUiThread {
+            launch(Dispatchers.Main) {
                 Log.d("TaskThread", Thread.currentThread().name)
                 image.setImageBitmap(bitmap)
             }
+
+//            runOnUiThread {
+//                Log.d("TaskThread", Thread.currentThread().name)
+//                image.setImageBitmap(bitmap)
+//            }
 
             /**
              * Loopers are pieces of the Android ecosystem which loops through all
@@ -131,5 +137,10 @@ class MainActivity : AppCompatActivity() {
      *  There are four different dispatchers but only two are commonly used. These are:
      *  1. Dispatchers.IO -> Used for input/output work
      *  2. Dispatchers.Main -> Used to post to the main thread.
+     *  3. Dispatchers.Default
+     *  4. Dispatchers.Unconfined
+     *
+     *  The Dispatchers.IO has Threads up to the number of processor cores or 64 (whichever is larger).
+     *  The Dispatchers.IO also shared the same threads with Dispatchers.Default
      */
 }
