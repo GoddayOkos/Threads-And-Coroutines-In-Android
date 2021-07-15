@@ -4,6 +4,7 @@ import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
+import android.util.Log
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -27,7 +28,9 @@ class MainActivity : AppCompatActivity() {
         // Get a reference to the MainLooper
         val mainLooper = mainLooper  // or Looper.getMainLooper()
 
+        Log.d("TaskThread", Thread.currentThread().name)
         GlobalScope.launch {
+            Log.d("TaskThread", Thread.currentThread().name)
             // Create and open a URL connection and cast it as HttpURLConnection
             val imageUrl = URL("https://www.pngkit.com/png/detail/17-176284_eagle-owl-png-transparent-image-owl-png.png")
             val connection = imageUrl.openConnection() as HttpURLConnection
@@ -38,6 +41,11 @@ class MainActivity : AppCompatActivity() {
             val inputStream = connection.inputStream
             // Decode the inputStream into a bitmap using BitmapFactory
             val bitmap = BitmapFactory.decodeStream(inputStream)
+
+            runOnUiThread {
+                Log.d("TaskThread", Thread.currentThread().name)
+                image.setImageBitmap(bitmap)
+            }
 
             /**
              * Loopers are pieces of the Android ecosystem which loops through all
@@ -50,7 +58,7 @@ class MainActivity : AppCompatActivity() {
              * The combination of handlers and loopers forms a relationship or connection
              * between signals and threads that should process them
              */
-            Handler(mainLooper).post { image.setImageBitmap(bitmap) }
+          //  Handler(mainLooper).post { image.setImageBitmap(bitmap) }
         }
 
         /**
