@@ -85,14 +85,23 @@ class MainActivity : AppCompatActivity() {
             .setRequiredNetworkType(NetworkType.NOT_ROAMING)
             .build()
 
+        val clearFilesWorker = OneTimeWorkRequestBuilder<FileClearWorker>()
+            .build()
+
         // Build the work request for the Worker
         val downloadRequest = OneTimeWorkRequestBuilder<DownloadWorker>()
             .setConstraints(constraints)
             .build()
 
         // Get the workManager to handle the work
+//        val workManager = WorkManager.getInstance(this)
+//        workManager.enqueue(downloadRequest)
+
+        // Chained workManager
         val workManager = WorkManager.getInstance(this)
-        workManager.enqueue(downloadRequest)
+        workManager.beginWith(clearFilesWorker)
+            .then(downloadRequest)
+            .enqueue()
 
         // Observe the work state to known if it's finished
         workManager.getWorkInfoByIdLiveData(downloadRequest.id).observe(this) { info ->

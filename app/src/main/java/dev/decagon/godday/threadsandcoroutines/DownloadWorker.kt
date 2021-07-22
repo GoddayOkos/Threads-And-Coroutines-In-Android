@@ -3,6 +3,7 @@ package dev.decagon.godday.threadsandcoroutines
 import android.content.Context
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
@@ -17,7 +18,7 @@ class DownloadWorker(context: Context, workerParameters: WorkerParameters) :
         connection.doInput = true
         connection.connect()
 
-        val imagePath = "owl_image.png"
+        val imagePath = "owl_image_${System.currentTimeMillis()}.png"
         val inputStream = connection.inputStream
         val file = File(applicationContext.externalMediaDirs.first(), imagePath)
 
@@ -35,7 +36,8 @@ class DownloadWorker(context: Context, workerParameters: WorkerParameters) :
 
             output.flush()
         }
+        val output = workDataOf("image_path" to file.absolutePath)
 
-        return Result.success()
+        return Result.success(output)
     }
 }
