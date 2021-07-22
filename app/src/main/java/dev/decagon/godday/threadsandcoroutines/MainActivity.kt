@@ -106,8 +106,11 @@ class MainActivity : AppCompatActivity() {
         // Observe the work state to known if it's finished
         workManager.getWorkInfoByIdLiveData(downloadRequest.id).observe(this) { info ->
             if (info.state.isFinished) {
-                val imageFile = File(externalMediaDirs.first(), "owl_image.png")
-                displayImage(imageFile.absolutePath)
+                val imagePath = info.outputData.getString("image_path")
+
+                if (!imagePath.isNullOrEmpty()) {
+                    displayImage(imagePath)
+                }
             }
         }
     }
