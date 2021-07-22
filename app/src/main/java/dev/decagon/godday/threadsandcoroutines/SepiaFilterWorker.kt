@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import java.io.File
 import java.io.FileOutputStream
 
 class SepiaFilterWorker(context: Context, workerParameters: WorkerParameters) :

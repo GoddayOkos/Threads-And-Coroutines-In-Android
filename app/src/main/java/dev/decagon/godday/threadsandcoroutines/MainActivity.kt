@@ -88,6 +88,10 @@ class MainActivity : AppCompatActivity() {
         val clearFilesWorker = OneTimeWorkRequestBuilder<FileClearWorker>()
             .build()
 
+        val sepiaFilterWorker = OneTimeWorkRequestBuilder<SepiaFilterWorker>()
+            .setConstraints(constraints)
+            .build()
+
         // Build the work request for the Worker
         val downloadRequest = OneTimeWorkRequestBuilder<DownloadWorker>()
             .setConstraints(constraints)
@@ -101,10 +105,11 @@ class MainActivity : AppCompatActivity() {
         val workManager = WorkManager.getInstance(this)
         workManager.beginWith(clearFilesWorker)
             .then(downloadRequest)
+            .then(sepiaFilterWorker)
             .enqueue()
 
         // Observe the work state to known if it's finished
-        workManager.getWorkInfoByIdLiveData(downloadRequest.id).observe(this) { info ->
+        workManager.getWorkInfoByIdLiveData(sepiaFilterWorker.id).observe(this) { info ->
             if (info.state.isFinished) {
                 val imagePath = info.outputData.getString("image_path")
 
