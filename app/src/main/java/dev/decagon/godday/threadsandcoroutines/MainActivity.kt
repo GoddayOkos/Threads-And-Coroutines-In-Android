@@ -1,17 +1,23 @@
 package dev.decagon.godday.threadsandcoroutines
 
+import android.content.IntentFilter
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.*
 import java.net.HttpURLConnection
 import java.net.URL
 
 /**
  * Main Screen
  */
+@DelicateCoroutinesApi
 class MainActivity : AppCompatActivity() {
+
+    private val receiver by lazy { ImageDownloadReceiver { displayImage(it) } }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Switch to AppTheme for displaying the activity
@@ -22,6 +28,10 @@ class MainActivity : AppCompatActivity() {
 
         // Get a reference to the MainLooper
         val mainLooper = mainLooper  // or Looper.getMainLooper()
+
+        registerReceiver(receiver, IntentFilter().apply {
+            addAction(ACTION_IMAGE_DOWNLOAD)
+        })
 
         /**
          * Android forbids making network calls or connections on MainThread in
@@ -67,4 +77,20 @@ class MainActivity : AppCompatActivity() {
         }.start()  // Start the thread
 
     }
+
+    override fun onDestroy() {
+        unregisterReceiver(receiver)
+        super.onDestroy()
+    }
+
+    private fun displayImage(imagePath: String) {
+        GlobalScope.launch(Dispatchers.Main) {
+            val bitmap = loadImageFromFile(imagePath)
+
+            image.setImageBitmap(bitmap)
+        }
+    }
+
+    private suspend fun loadImageFromFile(imagePath: String): Bitmap =
+        withContext(Dispatchers.IO) { BitmapFactory.decodeFile(imagePath) }
 }
