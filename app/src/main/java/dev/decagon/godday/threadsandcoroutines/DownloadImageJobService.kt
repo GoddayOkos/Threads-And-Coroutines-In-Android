@@ -2,6 +2,7 @@ package dev.decagon.godday.threadsandcoroutines
 
 import android.app.job.JobParameters
 import android.app.job.JobService
+import android.content.Intent
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
@@ -21,9 +22,7 @@ class DownloadImageJobService : JobService() {
         }
     }
 
-    override fun onStopJob(params: JobParameters?): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun onStopJob(params: JobParameters?): Boolean = false
 
     private fun downloadImage(imagePath: String) {
         Thread {
@@ -36,17 +35,27 @@ class DownloadImageJobService : JobService() {
             val inputStream = connection.inputStream
             val file = File(applicationContext.externalMediaDirs.first(), imageFilePath)
 
-            val outputStream = FileOutputStream(file)
-            outputStream.use { output ->
-                val buffer = ByteArray(4 * 1024)
-                var byteCount = inputStream.read(buffer)
+            try {
+                val outputStream = FileOutputStream(file)
+                outputStream.use { output ->
+                    val buffer = ByteArray(4 * 1024)
+                    var byteCount = inputStream.read(buffer)
 
-                while (byteCount > 0) {
-                    output.write(buffer, 0, byteCount)
-                    byteCount = inputStream.read(buffer)
+                    while (byteCount > 0) {
+                        output.write(buffer, 0, byteCount)
+                        byteCount = inputStream.read(buffer)
+                    }
+
+                    output.flush()
                 }
 
-                output.flush()
+                sendBroadcast(Intent().apply {
+                    action = ACTION_IMAGE_DOWNLOAD
+                    putExtra("image_path", file.absolutePath)
+                })
+            } catch (error: Throwable) {
+               error.printStackTrace()
+               jobFinished(null, false)
             }
         }.start()
     }
