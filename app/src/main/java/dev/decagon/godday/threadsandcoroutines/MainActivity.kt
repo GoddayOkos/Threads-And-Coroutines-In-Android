@@ -1,5 +1,9 @@
 package dev.decagon.godday.threadsandcoroutines
 
+
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Intent
 import android.graphics.BitmapFactory
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -7,6 +11,7 @@ import android.os.Handler
 import kotlinx.android.synthetic.main.activity_main.*
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.TimeUnit
 
 /**
  * Main Screen
@@ -20,8 +25,29 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val alarmManager = getSystemService(ALARM_SERVICE)  as AlarmManager
+        val currentTime = System.currentTimeMillis()
+
+        val pendingIntent = PendingIntent.getActivity(
+            this, 0,
+            Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        alarmManager.setExact(
+            AlarmManager.RTC_WAKEUP,
+            currentTime + TimeUnit.MILLISECONDS.toSeconds(10_000),
+            pendingIntent
+        )
+
         // Get a reference to the MainLooper
         val mainLooper = mainLooper  // or Looper.getMainLooper()
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
 
         /**
          * Android forbids making network calls or connections on MainThread in
@@ -48,7 +74,7 @@ class MainActivity : AppCompatActivity() {
              */
 
             // 1. This method is only available inside an activity
-        //    runOnUiThread { image.setImageBitmap(bitmap) }
+            //    runOnUiThread { image.setImageBitmap(bitmap) }
 
             // 2. Using Handler with MainLooper
             /**
@@ -65,6 +91,5 @@ class MainActivity : AppCompatActivity() {
             Handler(mainLooper).post { image.setImageBitmap(bitmap) }
 
         }.start()  // Start the thread
-
     }
 }
